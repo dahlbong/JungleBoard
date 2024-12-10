@@ -29,11 +29,29 @@
     <!-- 댓글 섹션 -->
     <div class="mt-4">
         <h4>댓글</h4>
-        <div class="mb-3">
-            <textarea id="commentContent" class="form-control" rows="3" placeholder="댓글을 입력하세요"></textarea>
-            <button id="addComment" class="btn btn-primary mt-2">댓글 작성</button>
-        </div>
         <div id="commentList"></div>
+        <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#commentModal">
+            댓글 작성
+        </button>
+    </div>
+
+    <!-- 댓글 작성 모달 -->
+    <div class="modal fade" id="commentModal" tabindex="-1" aria-labelledby="commentModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="commentModalLabel">댓글 작성</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <textarea id="commentContent" class="form-control" rows="3" placeholder="댓글을 입력하세요"></textarea>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">닫기</button>
+                    <button id="addComment" type="button" class="btn btn-primary">작성</button>
+                </div>
+            </div>
+        </div>
     </div>
 </div>
 
@@ -42,13 +60,14 @@
         $(document).ready(function() {
             const postId = window.location.pathname.split('/').pop();
             loadPost(postId);
+            loadComments(postId);
 
             $('#addComment').click(function() {
                 const content = $('#commentContent').val();
                 if (!content) return;
 
                 $.ajax({
-                    url: `/api/posts/${postId}/comments`,
+                    url: `/api/comments/posts/${postId}`,
                     type: 'POST',
                     headers: {
                         'Authorization': 'Bearer ' + localStorage.getItem('token')
@@ -57,7 +76,8 @@
                     data: JSON.stringify({ content: content }),
                     success: function() {
                         $('#commentContent').val('');
-                        loadPost(postId);
+                        $('#commentModal').modal('hide');
+                        loadComments(postId);
                     }
                 });
             });
@@ -96,8 +116,19 @@
                         $('#postActions').show();
                         $('#editButton').attr('href', `/posts/${postId}/edit`);
                     }
+                }
+            });
+        }
 
-                    renderComments(post.comments);
+        function loadComments(postId) {
+            $.ajax({
+                url: `/api/comments/posts/${postId}`,
+                type: 'GET',
+                headers: {
+                    'Authorization': 'Bearer ' + localStorage.getItem('token')
+                },
+                success: function(comments) {
+                    renderComments(comments);
                 }
             });
         }
@@ -122,7 +153,7 @@
                         </div>
                     </div>
                 `;
-                commentList.append(commentHtml);
+                commentList.prepend(commentHtml);
             });
         }
     </script>

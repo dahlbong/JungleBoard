@@ -16,20 +16,18 @@ import java.util.Collections;
 @Service
 @RequiredArgsConstructor
 public class CustomUserDetailsService implements UserDetailsService {
-
     private final UserRepository userRepository;
 
     @Override
     @Transactional(readOnly = true)
     public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
-        return userRepository.findByEmail(email)
-                .map(this::createUserDetails)
+        UserEntity user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new UsernameNotFoundException("User not found with email: " + email));
+        return createUserDetails(user);
     }
 
     private UserDetails createUserDetails(UserEntity user) {
         SimpleGrantedAuthority authority = new SimpleGrantedAuthority("ROLE_USER");
-
         return User.builder()
                 .username(user.getEmail())
                 .password(user.getPassword())

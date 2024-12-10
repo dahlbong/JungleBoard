@@ -46,15 +46,9 @@ public class ViewController {
         return "posts/edit";
     }
 
-    // MyPage
-    @GetMapping("/mypage")
-    public String myPage() {
-        return "user/mypage";
-    }
-
     // OAuth2 redirect
     @GetMapping("/oauth2/redirect")
     public String oauth2RedirectHandler() {
-        return "auth/oauth2-redirect";
+        return "redirect:/posts";
     }
 }
